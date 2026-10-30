@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FreshMart - Farm Fresh Groceries & Daily Essentials Delivered in 20 Mins</title>
+  <meta name="description" content="Shop fresh organic vegetables, fruits, dairy, bakery items and pantry essentials online with instant 20-minute delivery in India." />
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              800: '#065f46',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col selection:bg-emerald-500 selection:text-white">
+
+  <!-- Top Announcement Bar -->
+  <div class="bg-emerald-800 text-emerald-100 text-xs py-2 px-4 text-center font-medium flex items-center justify-center gap-2">
+    <span class="inline-block px-2 py-0.5 rounded-full bg-emerald-600 text-white font-bold text-[10px] tracking-wide uppercase">Special Deal</span>
+    <span>Use code <button onclick="quickApplyPromo('FREESHIP')" class="underline font-bold text-white hover:text-emerald-200">FREESHIP</button> for free delivery or <button onclick="quickApplyPromo('FRESH20')" class="underline font-bold text-white hover:text-emerald-200">FRESH20</button> for 20% off over ₹499!</span>
+  </div>
+
+  <!-- Header / Navigation Bar -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-20 gap-4">
+        
+        <!-- Logo -->
+        <a href="#" class="flex items-center gap-3 flex-shrink-0 group">
+          <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center text-white shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-transform">
+            <i data-lucide="shopping-basket" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <span class="text-2xl font-black tracking-tight text-slate-900">Fresh<span class="text-emerald-600">Mart</span></span>
+              <span class="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">20 MIN</span>
+            </div>
+            <p class="text-[11px] text-slate-400 font-medium">Organic & Daily Grocery</p>
+          </div>
+        </a>
+
+        <!-- Delivery Location Button -->
+        <button 
+          onclick="openAddressModal()" 
+          class="hidden md:flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold border border-slate-200 transition text-left max-w-[230px]"
+          title="Click to change delivery location"
+        >
+          <div class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="map-pin" class="w-4 h-4"></i>
+          </div>
+          <div class="truncate">
+            <span class="block text-[10px] uppercase tracking-wider text-slate-400 font-bold">Delivery to</span>
+            <span id="nav-delivery-address" class="block font-bold text-slate-800 truncate">Flat 402, Indiranagar, Bengaluru</span>
+          </div>
+        </button>
+
+        <!-- Search Bar -->
+        <div class="flex-1 max-w-xl relative">
+          <div class="relative">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+            <input 
+              type="text" 
+              id="search-input" 
+              placeholder="Search farm fresh apples, milk, paneer, brown rice..." 
+              class="w-full pl-10 pr-10 py-2.5 rounded-xl bg-slate-100 border border-transparent focus:border-emerald-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-sm transition placeholder:text-slate-400 text-slate-800"
+            />
+            <button 
+              id="clear-search-btn"
+              onclick="document.getElementById('search-input').value = ''; State.searchQuery = ''; this.classList.add('hidden'); renderProducts();"
+              class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+            >
+              <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Navigation Actions (Orders, Wishlist, Cart) -->
+        <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+          
+          <!-- Orders History Button -->
+          <button 
+            onclick="openOrdersModal()"
+            class="flex items-center gap-1.5 p-2 sm:px-3 sm:py-2 rounded-xl text-slate-600 hover:text-emerald-600 hover:bg-slate-100 text-sm font-semibold transition"
+            title="View Past Orders"
+          >
+            <i data-lucide="clock" class="w-5 h-5"></i>
+            <span class="hidden lg:inline text-xs">Orders</span>
+          </button>
+
+          <!-- Wishlist Button -->
+          <button 
+            onclick="toggleWishlistModal()"
+            class="relative p-2 sm:px-3 sm:py-2 rounded-xl text-slate-600 hover:text-emerald-600 hover:bg-slate-100 text-sm font-semibold transition"
+            title="Wishlist"
+          >
+            <div class="relative flex items-center gap-1.5">
+              <i data-lucide="heart" class="w-5 h-5"></i>
+              <span class="hidden lg:inline text-xs">Wishlist</span>
+              <span id="wishlist-badge" class="hidden absolute -top-1.5 -right-2 bg-rose-500 text-white text-[10px] font-bold rounded-full h-4 min-w-[16px] px-1 flex items-center justify-center">0</span>
+            </div>
+          </button>
+
+          <!-- Cart Button -->
+          <button 
+            onclick="toggleCartDrawer()" 
+            class="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md shadow-emerald-600/25 transition active:scale-95"
+            title="Open Basket"
+          >
+            <div class="relative">
+              <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+              <span id="cart-badge" class="hidden absolute -top-2 -right-2.5 bg-amber-400 text-slate-900 text-[10px] font-extrabold rounded-full h-4 min-w-[16px] px-1 flex items-center justify-center shadow-xs">0</span>
+            </div>
+            <span class="hidden sm:inline border-l border-emerald-500/80 pl-2 text-xs" id="cart-nav-total">₹0</span>
+          </button>
+
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- Hero Promotional Banner -->
+    <section class="relative rounded-3xl overflow-hidden mb-8 bg-gradient-to-r from-emerald-900 via-emerald-800 to-teal-800 text-white shadow-xl">
+      <!-- Background subtle decorative shapes -->
+      <div class="absolute -right-10 -bottom-10 w-96 h-96 rounded-full bg-emerald-600/20 blur-3xl pointer-events-none"></div>
+      <div class="absolute right-1/3 top-0 w-64 h-64 rounded-full bg-teal-500/10 blur-2xl pointer-events-none"></div>
+
+      <div class="relative z-10 px-6 sm:px-12 py-10 sm:py-14 max-w-2xl">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-700/60 text-emerald-200 border border-emerald-500/30 text-xs font-semibold uppercase tracking-wider mb-4">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-300"></i>
+          100% Organic & Farm Fresh
+        </div>
+
+        <h1 class="text-3xl sm:text-5xl font-black tracking-tight leading-tight mb-4 text-white">
+          Groceries Delivered to Your Door in <span class="text-amber-300 underline decoration-emerald-400 decoration-wavy decoration-2">20 Minutes</span>
+        </h1>
+
+        <p class="text-emerald-100 text-sm sm:text-base leading-relaxed mb-6 font-normal">
+          Handpicked crisp vegetables, fresh seasonal fruits, dairy, paneer, and daily essentials sourced directly from local ethical farms.
+        </p>
+
+        <!-- Quick Promo Coupons -->
+        <div class="flex flex-wrap items-center gap-3 pt-2">
+          <div class="text-xs text-emerald-200 font-semibold">Active Coupons:</div>
+          <button onclick="quickApplyPromo('FRESH20')" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 text-xs font-mono font-bold text-white flex items-center gap-1.5 transition">
+            <i data-lucide="tag" class="w-3 h-3 text-amber-300"></i> FRESH20 <span class="text-emerald-300 font-sans font-normal">(20% off over ₹499)</span>
+          </button>
+          <button onclick="quickApplyPromo('FREESHIP')" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 text-xs font-mono font-bold text-white flex items-center gap-1.5 transition">
+            <i data-lucide="truck" class="w-3 h-3 text-amber-300"></i> FREESHIP <span class="text-emerald-300 font-sans font-normal">(Free Delivery)</span>
+          </button>
+          <button onclick="quickApplyPromo('SAVE100')" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 text-xs font-mono font-bold text-white flex items-center gap-1.5 transition">
+            <i data-lucide="badge-percent" class="w-3 h-3 text-amber-300"></i> SAVE100 <span class="text-emerald-300 font-sans font-normal">(₹100 off over ₹599)</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Value Propositions / Feature Badges -->
+    <section class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div class="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex items-center gap-3.5">
+        <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
+          <i data-lucide="zap" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <h4 class="font-bold text-slate-800 text-sm">Superfast 20 Min</h4>
+          <p class="text-xs text-slate-500">At your doorstep instantly</p>
+        </div>
+      </div>
+
+      <div class="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex items-center gap-3.5">
+        <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
+          <i data-lucide="leaf" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <h4 class="font-bold text-slate-800 text-sm">100% Fresh & Organic</h4>
+          <p class="text-xs text-slate-500">Sourced from certified farms</p>
+        </div>
+      </div>
+
+      <div class="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex items-center gap-3.5">
+        <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
+          <i data-lucide="badge-percent" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <h4 class="font-bold text-slate-800 text-sm">Best Mandi Deals</h4>
+          <p class="text-xs text-slate-500">Everyday discounts & savings</p>
+        </div>
+      </div>
+
+      <div class="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex items-center gap-3.5">
+        <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
+          <i data-lucide="shield-check" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <h4 class="font-bold text-slate-800 text-sm">Quality Guaranteed</h4>
+          <p class="text-xs text-slate-500">Instant replacement or refund</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Category Filter Bar -->
+    <section class="mb-6">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-lg font-bold text-slate-900">Explore by Category</h2>
+        <span class="text-xs text-slate-500">Tap a category to filter</span>
+      </div>
+      <div id="category-pills" class="flex items-center gap-2.5 overflow-x-auto pb-2 scrollbar-none">
+        <!-- Injected dynamically by js/app.js -->
+      </div>
+    </section>
+
+    <!-- Toolbar: Product Count & Filter Toggles & Sorting -->
+    <section class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs mb-6 flex flex-wrap items-center justify-between gap-4">
+      
+      <!-- Counter -->
+      <div class="flex items-center gap-2">
+        <span id="product-count" class="text-sm font-bold text-slate-700">Loading products...</span>
+      </div>
+
+      <!-- Quick Checkbox Filters & Sort Select -->
+      <div class="flex flex-wrap items-center gap-4 text-xs font-semibold">
+        
+        <!-- Organic Only Checkbox -->
+        <label class="flex items-center gap-2 cursor-pointer select-none text-slate-600 hover:text-emerald-700">
+          <input type="checkbox" id="filter-organic" class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-slate-300" />
+          <span>🌿 Organic Only</span>
+        </label>
+
+        <!-- Discounted Only Checkbox -->
+        <label class="flex items-center gap-2 cursor-pointer select-none text-slate-600 hover:text-emerald-700">
+          <input type="checkbox" id="filter-discount" class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-slate-300" />
+          <span>🏷️ Discounted</span>
+        </label>
+
+        <!-- Sort dropdown -->
+        <div class="flex items-center gap-1.5 pl-2 border-l border-slate-200">
+          <span class="text-slate-400">Sort by:</span>
+          <select id="sort-select" class="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 font-semibold text-slate-700 focus:outline-none focus:border-emerald-500">
+            <option value="featured">Featured Picks</option>
+            <option value="price-low">Price: Low to High</option>
+            <option value="price-high">Price: High to Low</option>
+            <option value="rating">Highest Rated</option>
+            <option value="name">Name (A-Z)</option>
+          </select>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- Products Grid -->
+    <section>
+      <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <!-- Injected dynamically by js/app.js -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Slide-out Shopping Cart Drawer -->
+  <div id="cart-backdrop" onclick="toggleCartDrawer()" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 transition-opacity"></div>
+  <aside id="cart-drawer" class="fixed top-0 right-0 bottom-0 w-full max-w-md bg-slate-50 z-50 shadow-2xl flex flex-col transform translate-x-full transition-transform duration-300 ease-in-out">
+    
+    <!-- Drawer Header -->
+    <div class="p-5 bg-white border-b border-slate-200 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+          <i data-lucide="shopping-bag" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 class="font-bold text-slate-900 text-base">Your Grocery Basket</h3>
+          <p class="text-xs text-slate-500">Free delivery over ₹499</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="clearCart()" class="text-xs font-semibold text-rose-500 hover:text-rose-700 px-2 py-1 rounded hover:bg-rose-50" title="Clear all items">
+          Clear
+        </button>
+        <button onclick="toggleCartDrawer()" class="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Free Delivery Progress Meter -->
+    <div class="bg-emerald-50/70 p-3.5 border-b border-emerald-100">
+      <div class="flex items-center justify-between text-xs text-slate-700 mb-1.5" id="free-shipping-text">
+        <span>Add <strong>₹499</strong> more for <strong>FREE Delivery</strong></span>
+      </div>
+      <div class="w-full h-2 bg-emerald-100 rounded-full overflow-hidden">
+        <div id="free-shipping-progress" class="h-full bg-emerald-500 rounded-full transition-all duration-300" style="width: 0%"></div>
+      </div>
+    </div>
+
+    <!-- Scrollable Items List -->
+    <div class="flex-grow overflow-y-auto p-4 space-y-3">
+      <div id="cart-empty-state" class="hidden text-center py-16">
+        <div class="w-16 h-16 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-3">
+          <i data-lucide="shopping-cart" class="w-8 h-8"></i>
+        </div>
+        <h4 class="font-bold text-slate-800 text-base mb-1">Your basket is empty</h4>
+        <p class="text-xs text-slate-500 mb-4">Add fresh fruits, veggies, milk, and groceries.</p>
+        <button onclick="toggleCartDrawer()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs shadow">
+          Start Shopping
+        </button>
+      </div>
+
+      <div id="cart-items-container" class="space-y-2.5">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+    <!-- Cart Footer & Bill Summary -->
+    <div id="cart-footer" class="p-5 bg-white border-t border-slate-200">
+      
+      <!-- Promo Code Section -->
+      <div id="applied-promo-container"></div>
+      <div class="flex items-center gap-2 mb-4">
+        <input 
+          type="text" 
+          id="promo-input" 
+          placeholder="Promo code (e.g. FRESH20)" 
+          class="flex-1 uppercase text-xs px-3 py-2 rounded-lg bg-slate-100 border border-slate-200 focus:bg-white focus:outline-none focus:border-emerald-500"
+        />
+        <button onclick="applyPromoCode()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs rounded-lg transition">
+          Apply
+        </button>
+      </div>
+
+      <!-- Bill Breakdown -->
+      <div class="space-y-1.5 text-xs text-slate-600 mb-4 pb-3 border-b border-slate-100">
+        <div class="flex justify-between">
+          <span>Item Subtotal</span>
+          <span id="summary-subtotal" class="font-semibold text-slate-800">₹0</span>
+        </div>
+        <div class="flex justify-between">
+          <span>Delivery Fee</span>
+          <span id="summary-delivery" class="font-semibold text-slate-800">₹40</span>
+        </div>
+        <div id="summary-discount-row" class="hidden flex justify-between text-emerald-600 font-semibold">
+          <span>Discount Applied</span>
+          <span id="summary-discount">-₹0</span>
+        </div>
+        <div class="flex justify-between text-sm font-extrabold text-slate-900 pt-2 border-t border-slate-100">
+          <span>Total To Pay</span>
+          <span id="summary-total" class="text-emerald-700">₹0</span>
+        </div>
+      </div>
+
+      <!-- Checkout Button -->
+      <button 
+        onclick="openCheckoutModal()"
+        class="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl shadow-lg shadow-emerald-600/30 flex items-center justify-between transition active:scale-[0.98]"
+      >
+        <span>Proceed to Checkout</span>
+        <div class="flex items-center gap-1.5">
+          <span id="cart-checkout-total" class="font-extrabold">₹0</span>
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </div>
+      </button>
+
+    </div>
+  </aside>
+
+  <!-- Checkout Modal -->
+  <div id="checkout-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative">
+      
+      <button onclick="closeCheckoutModal()" class="absolute top-5 right-5 p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <!-- Checkout Form -->
+      <form id="checkout-form" onsubmit="handleCheckoutSubmit(event)" class="p-6 sm:p-8">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+            <i data-lucide="truck" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-xl font-black text-slate-900">Complete Your Order</h3>
+            <p class="text-xs text-slate-500">Fast 20-30 min doorstep grocery delivery</p>
+          </div>
+        </div>
+
+        <div class="space-y-4 mb-6">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Your Name *</label>
+              <input type="text" id="cust-name" required placeholder="Rahul Sharma" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:bg-white focus:outline-none focus:border-emerald-500" value="Rahul Sharma" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Mobile Number *</label>
+              <input type="tel" id="cust-phone" required placeholder="+91 98765 43210" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:bg-white focus:outline-none focus:border-emerald-500" value="+91 98765 43210" />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Delivery Address *</label>
+            <input type="text" id="checkout-address-input" required placeholder="Flat/House No., Building, Street, Landmark, Pincode" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:bg-white focus:outline-none focus:border-emerald-500" />
+          </div>
+
+          <!-- Delivery Slot Selector -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Delivery Time Slot</label>
+            <div class="grid grid-cols-3 gap-2">
+              <label class="flex flex-col items-center justify-center p-2.5 rounded-xl border border-emerald-500 bg-emerald-50/50 cursor-pointer text-center text-xs">
+                <input type="radio" name="slot" value="Express" checked class="hidden" />
+                <span class="font-bold text-emerald-800">⚡ Express</span>
+                <span class="text-[10px] text-emerald-600">20-30 Mins</span>
+              </label>
+              <label class="flex flex-col items-center justify-center p-2.5 rounded-xl border border-slate-200 hover:border-slate-300 cursor-pointer text-center text-xs">
+                <input type="radio" name="slot" value="Morning" class="hidden" />
+                <span class="font-bold text-slate-700">☀️ Morning</span>
+                <span class="text-[10px] text-slate-400">8 AM - 10 AM</span>
+              </label>
+              <label class="flex flex-col items-center justify-center p-2.5 rounded-xl border border-slate-200 hover:border-slate-300 cursor-pointer text-center text-xs">
+                <input type="radio" name="slot" value="Evening" class="hidden" />
+                <span class="font-bold text-slate-700">🌙 Evening</span>
+                <span class="text-[10px] text-slate-400">6 PM - 8 PM</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Payment Options (Indian Payment Methods) -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Payment Method</label>
+            <div class="grid grid-cols-3 gap-2">
+              <label class="flex items-center gap-2 p-2.5 rounded-xl border border-emerald-500 bg-emerald-50/20 cursor-pointer text-xs font-semibold">
+                <input type="radio" name="payment_method" value="UPI" checked class="text-emerald-600 focus:ring-emerald-500" />
+                <span>UPI (GPay / PhonePe)</span>
+              </label>
+              <label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 hover:border-emerald-500 cursor-pointer text-xs font-semibold">
+                <input type="radio" name="payment_method" value="Cash on Delivery" class="text-emerald-600 focus:ring-emerald-500" />
+                <span>Cash on Delivery</span>
+              </label>
+              <label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 hover:border-emerald-500 cursor-pointer text-xs font-semibold">
+                <input type="radio" name="payment_method" value="Debit / Credit Card" class="text-emerald-600 focus:ring-emerald-500" />
+                <span>Card (Demo)</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Summary Box -->
+        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 mb-6 text-xs space-y-1.5">
+          <div class="flex justify-between text-slate-600">
+            <span>Items Subtotal:</span>
+            <span id="checkout-subtotal" class="font-semibold text-slate-800">₹0</span>
+          </div>
+          <div class="flex justify-between text-slate-600">
+            <span>Delivery Fee:</span>
+            <span id="checkout-delivery" class="font-semibold text-slate-800">₹40</span>
+          </div>
+          <div id="checkout-discount-row" class="hidden flex justify-between text-emerald-600 font-semibold">
+            <span>Coupon Discount:</span>
+            <span id="checkout-discount">-₹0</span>
+          </div>
+          <div class="flex justify-between font-extrabold text-base text-slate-900 pt-2 border-t border-slate-200">
+            <span>Amount to Pay:</span>
+            <span id="checkout-total" class="text-emerald-700 font-black">₹0</span>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button 
+          type="submit" 
+          class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl shadow-lg shadow-emerald-600/30 transition active:scale-98 flex items-center justify-center gap-2"
+        >
+          <i data-lucide="check-circle" class="w-4 h-4"></i> Place Order Now
+        </button>
+      </form>
+
+      <!-- Order Success State -->
+      <div id="order-success-screen" class="hidden p-8 text-center">
+        <canvas id="confetti-canvas" class="fixed inset-0 pointer-events-none z-50"></canvas>
+        <div class="w-20 h-20 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-4 animate-bounce-slow">
+          <i data-lucide="check-circle-2" class="w-10 h-10"></i>
+        </div>
+        
+        <h3 class="text-2xl font-black text-slate-900 mb-1">Order Placed Successfully! 🎉</h3>
+        <p class="text-sm text-slate-500 mb-6">Your fresh groceries are being packed with care.</p>
+
+        <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-xs text-left max-w-sm mx-auto mb-6 space-y-2">
+          <div class="flex justify-between">
+            <span class="text-slate-400">Order ID:</span>
+            <span id="success-order-id" class="font-mono font-bold text-slate-800">FM-123456</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-400">Estimated Delivery:</span>
+            <span id="success-order-eta" class="font-bold text-emerald-600">20-30 mins</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-400">Amount Paid:</span>
+            <span id="success-order-total" class="font-bold text-slate-800">₹0</span>
+          </div>
+        </div>
+
+        <!-- Simulated Delivery Status Stepper -->
+        <div class="max-w-sm mx-auto mb-8">
+          <div class="flex items-center justify-between text-[11px] font-bold text-slate-600 mb-2">
+            <span class="text-emerald-600">✓ Order Confirmed</span>
+            <span class="text-emerald-600 animate-pulse">● Packing Fresh Items</span>
+            <span class="text-slate-400">Out for Delivery</span>
+          </div>
+          <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+            <div class="bg-emerald-600 h-full rounded-full w-2/3"></div>
+          </div>
+        </div>
+
+        <button 
+          onclick="closeCheckoutModal()" 
+          class="px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow transition"
+        >
+          Continue Shopping
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Quick View Modal -->
+  <div id="quickview-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-2xl w-full overflow-hidden shadow-2xl relative animate-scale-up">
+      <button onclick="closeQuickView()" class="absolute top-4 right-4 z-20 p-2 rounded-full bg-white/90 hover:bg-white text-slate-600 shadow-md">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+      <div id="quickview-content">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Wishlist Modal -->
+  <div id="wishlist-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl relative max-h-[85vh] flex flex-col">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <div class="flex items-center gap-2">
+          <i data-lucide="heart" class="w-5 h-5 text-rose-500 fill-rose-500"></i>
+          <h3 class="font-bold text-slate-900 text-base">Your Wishlist</h3>
+        </div>
+        <button onclick="toggleWishlistModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="flex-grow overflow-y-auto py-4">
+        <div id="wishlist-empty-state" class="hidden text-center py-12">
+          <div class="w-14 h-14 bg-rose-50 text-rose-400 rounded-full flex items-center justify-center mx-auto mb-2">
+            <i data-lucide="heart" class="w-7 h-7"></i>
+          </div>
+          <p class="text-sm font-semibold text-slate-700 mb-1">Your wishlist is empty</p>
+          <p class="text-xs text-slate-400">Click the heart icon on any product to save it here.</p>
+        </div>
+        <div id="wishlist-items-container" class="space-y-2.5">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order History Modal -->
+  <div id="orders-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl relative max-h-[85vh] flex flex-col">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
+            <i data-lucide="clock" class="w-4 h-4"></i>
+          </div>
+          <h3 class="font-bold text-slate-900 text-base">Past Grocery Orders</h3>
+        </div>
+        <button onclick="closeOrdersModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="flex-grow overflow-y-auto py-4">
+        <div id="orders-empty" class="text-center py-12">
+          <div class="w-14 h-14 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-2">
+            <i data-lucide="package" class="w-7 h-7"></i>
+          </div>
+          <p class="text-sm font-semibold text-slate-700 mb-1">No orders yet</p>
+          <p class="text-xs text-slate-400">Your completed grocery orders will appear here.</p>
+        </div>
+        <div id="orders-list">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Address Edit Modal -->
+  <div id="address-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl relative">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-2">
+          <i data-lucide="map-pin" class="w-5 h-5 text-emerald-600"></i>
+          <h3 class="font-bold text-slate-900 text-base">Change Delivery Location</h3>
+        </div>
+        <button onclick="closeAddressModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <p class="text-xs text-slate-500 mb-4">We deliver within 20-30 minutes across your metropolitan area.</p>
+
+      <div class="mb-4">
+        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Street Address, Area & Pincode</label>
+        <input 
+          type="text" 
+          id="address-input" 
+          placeholder="e.g. Flat 402, Green Acres, Indiranagar, Bengaluru - 560038" 
+          class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:bg-white focus:outline-none focus:border-emerald-500" 
+        />
+      </div>
+
+      <div class="flex items-center justify-end gap-2">
+        <button onclick="closeAddressModal()" class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 text-xs font-bold">
+          Cancel
+        </button>
+        <button onclick="saveAddress()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow">
+          Update Address
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col items-end space-y-2">
+    <!-- Toasts dynamically appended here -->
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-200 mt-16 pt-12 pb-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+        
+        <!-- Brand Info -->
+        <div class="space-y-3">
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold">
+              <i data-lucide="shopping-basket" class="w-5 h-5"></i>
+            </div>
+            <span class="text-xl font-black text-slate-900">Fresh<span class="text-emerald-600">Mart</span></span>
+          </div>
+          <p class="text-xs text-slate-500 leading-relaxed">
+            Your neighborhood online grocery mart delivering 100% farm-fresh organic fruits, vegetables, dairy, paneer, and daily essentials straight to your door.
+          </p>
+          <div class="flex items-center gap-3 text-slate-400 pt-1">
+            <span class="text-xs font-semibold text-emerald-600">📞 1800-123-MART (Toll Free)</span>
+          </div>
+        </div>
+
+        <!-- Quick Categories -->
+        <div>
+          <h4 class="font-bold text-slate-800 text-sm mb-3">Popular Aisles</h4>
+          <ul class="space-y-2 text-xs text-slate-500 font-medium">
+            <li><button onclick="setCategory('fruits')" class="hover:text-emerald-600">Fresh Organic Fruits</button></li>
+            <li><button onclick="setCategory('vegetables')" class="hover:text-emerald-600">Farm Crisp Vegetables</button></li>
+            <li><button onclick="setCategory('dairy')" class="hover:text-emerald-600">Dairy, Paneer & Eggs</button></li>
+            <li><button onclick="setCategory('bakery')" class="hover:text-emerald-600">Artisanal Bakery & Breads</button></li>
+            <li><button onclick="setCategory('beverages')" class="hover:text-emerald-600">Juices, Cold Brews & Tea</button></li>
+          </ul>
+        </div>
+
+        <!-- Customer Care -->
+        <div>
+          <h4 class="font-bold text-slate-800 text-sm mb-3">Customer Support</h4>
+          <ul class="space-y-2 text-xs text-slate-500 font-medium">
+            <li><button onclick="openOrdersModal()" class="hover:text-emerald-600">Track Recent Orders</button></li>
+            <li><button onclick="openAddressModal()" class="hover:text-emerald-600">Delivery Zones & Slots</button></li>
+            <li><a href="#" class="hover:text-emerald-600">100% Freshness Guarantee</a></li>
+            <li><a href="#" class="hover:text-emerald-600">Refund & Return Policy</a></li>
+            <li><a href="#" class="hover:text-emerald-600">Privacy & Terms</a></li>
+          </ul>
+        </div>
+
+        <!-- Delivery Guarantee -->
+        <div class="bg-emerald-50/60 p-4 rounded-2xl border border-emerald-100">
+          <h4 class="font-bold text-emerald-900 text-sm mb-1">⚡ 20-Min Delivery Promise</h4>
+          <p class="text-xs text-emerald-700/80 mb-3 leading-relaxed">
+            Freshness guaranteed or instant credit back to your account.
+          </p>
+          <div class="flex items-center gap-2 text-xs font-bold text-emerald-800">
+            <i data-lucide="check-circle" class="w-4 h-4 text-emerald-600"></i>
+            <span>UPI & Cash on Delivery Accepted</span>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-2">
+        <p>&copy; 2026 FreshMart India. Built purely with HTML, CSS, and JavaScript.</p>
+        <div class="flex items-center gap-4">
+          <span>Safe & Secure Checkout</span>
+          <span>100% Cash On Delivery Available</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts: Pure Vanilla JavaScript -->
+  <script src="js/products.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
